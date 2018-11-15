@@ -27,7 +27,7 @@ deploy_beta: &deploy_beta
   only:
    - master
   script:
-    - cd $ANSIBLE_DIR && ansible-playbook -i beta --vault-password-file "/root/.vault_pass" playbooks/gitter/irc-servers.yml -vvvv
+    - cd $ANSIBLE_DIR && ansible-playbook -i beta --vault-password-file "/root/.vault_pass" playbooks/gitter/irc-servers.yml
   environment:
     name: beta
     url: https://irc-beta.gitter.im
@@ -44,7 +44,7 @@ deploy_prod_manual:
   # Production is only manual
   when: manual
   script:
-    - cd $ANSIBLE_DIR && ansible-playbook -i prod --vault-password-file "/root/.vault_pass" playbooks/gitter/irc-servers.yml -vvvv
+    - cd $ANSIBLE_DIR && ansible-playbook -i prod --vault-password-file "/root/.vault_pass" playbooks/gitter/irc-servers.yml
   environment:
     name: prod
     url: https://irc.gitter.im
