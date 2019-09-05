@@ -59,4 +59,68 @@ describe('Gitter Adapter', function(){
     return adapter.sendPromiseChain;
   });
 
+  it('Should report users for who', function() {
+    client.authenticated = true;
+    client.nick = 'bar'; // obtained after auth
+    var spy = sinon.spy();
+    var stub = sinon.stub(socket, 'write', spy);
+    adapter.sendMessage = spy;
+    adapter.setup("fake-token");
+    var eventMap = {};
+    adapter.subscribeToRoom({
+      'uri':'hello',
+      'id':'hello-room',
+      subscribe:function(){},
+      on:function(event, cb) {
+        eventMap[event] = cb;
+      }
+    });
+    client.parse('WHO hello');
+    eventMap['users']({
+      'operation': 'create',
+      'model': {
+        'username': 'test'
+      }
+    });
+    adapter.sendPromiseChain = adapter.sendPromiseChain.then(function() {
+      assert(spy.firstCall.calledWith(':bar!bar@irc.gitter.im WHO :hello\r\n'));
+      assert(spy.secondCall.calledWith(':test!test@irc.gitter.im JOIN #hello\r\n'));
+      assert(spy.calledTwice);
+    });
+    return adapter.sendPromiseChain;
+  });
+
+  it('Should report users for messages', function() {
+    client.authenticated = true;
+    client.nick = 'bar'; // obtained after auth
+    var spy = sinon.spy();
+    var stub = sinon.stub(socket, 'write', spy);
+    adapter.sendMessage = spy;
+    adapter.setup("fake-token");
+    var eventMap = {};
+    adapter.subscribeToRoom({
+      'uri':'hello',
+      'id':'hello-room',
+      subscribe:function(){},
+      on:function(event, cb) {
+        eventMap[event] = cb;
+      }
+    });
+    eventMap['chatMessages']({
+      'operation': 'create',
+      'model': {
+        'fromUser': {
+          'username': 'test'
+        },
+        'text': 'hello',
+        'id': 1000,
+      },
+    });
+    adapter.sendPromiseChain = adapter.sendPromiseChain.then(function() {
+      assert(spy.firstCall.calledWith(':test!test@irc.gitter.im JOIN #hello\r\n'));
+      assert(spy.secondCall.calledWith(':test!test@irc.gitter.im PRIVMSG #hello :hello\r\n'));
+      assert(spy.calledTwice);
+    });
+    return adapter.sendPromiseChain;
+  });
 });
