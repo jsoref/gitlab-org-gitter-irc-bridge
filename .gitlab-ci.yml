@@ -2,7 +2,6 @@ stages:
   - test
   - deploy
 
-
 .deploy_job: &deploy_job
   stage: deploy
   image: registry.gitlab.com/gitlab-org/gitter/webapp/deploy-build-image:latest
@@ -17,7 +16,7 @@ stages:
     - mkdir -p ~/.ssh
     - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
     # Make the infra tools available (like Ansible)
-    - git clone git@gitlab.com:gl-infra/gitter-infrastructure.git
+    - git clone git@gitlab.com:gitlab-com/gl-infra/gitter-infrastructure.git
     - ANSIBLE_DIR=$(cd gitter-infrastructure/ansible && pwd) && echo $ANSIBLE_DIR
     - mkdir -p /root && echo "$ANSIBLE_VAULT_PASS" > /root/.vault_pass
   tags:
@@ -26,7 +25,7 @@ stages:
 deploy_beta: &deploy_beta
   <<: *deploy_job
   only:
-   - master
+    - master
   script:
     - cd $ANSIBLE_DIR && ansible-playbook -i beta --vault-password-file "/root/.vault_pass" playbooks/gitter/irc-servers.yml
   environment:
@@ -36,7 +35,6 @@ deploy_beta: &deploy_beta
 deploy_beta_manual:
   <<: *deploy_beta
   when: manual
-
 
 deploy_prod_manual:
   <<: *deploy_job
